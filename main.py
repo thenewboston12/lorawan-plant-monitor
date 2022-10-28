@@ -20,8 +20,11 @@ lightsensor.integration_time = 3
 
 # Initialize OneWire bus for temp Sensor
 # DS18B20 data line connected to pin P21
-ow = OneWire(Pin('P21'))
-temp = DS18X20(ow)
+ow1 = OneWire(Pin('P21'))
+ow2 = OneWire(Pin('P22'))
+air_temp = DS18X20(ow1)
+soil_temp = DS18X20(ow2)
+
 
 print("Starting measurements...")
 
@@ -35,10 +38,13 @@ while True:
 
     print("Ambient Light luminance : %.2f lux" % read_lux)
 
-    # Measure and print ambient temperature
-    print(temp.read_temp_async())
+    # Measure and print temperatures
+    print("Air temperature: %.2f °C"% air_temp.read_temp_async())
+    print("Soil temperature: %.2f °C " % soil_temp.read_temp_async())
+
     time.sleep(2)
-    temp.start_conversion()
+    air_temp.start_conversion()
+    soil_temp.start_conversion()
     time.sleep(5)
 
 
