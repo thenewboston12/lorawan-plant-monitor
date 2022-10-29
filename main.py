@@ -1,74 +1,67 @@
-# sync
+from network import LoRa
+import socket
 import time
-from machine import Pin
-from machine import I2C
-import MAX44009
-from onewire import DS18X20
-from onewire import OneWire
+import ubinascii
+import struct
+import pycom
 
-# initialize I2C bus for ambient light sensor
-i2c = I2C(0, I2C.MASTER)
-i2c = I2C(0, pins=('P9','P10'))
-i2c.init(I2C.MASTER, baudrate=10000)
+# Initialise LoRa in LORAWAN mode.
+# Please pick the region that matches where you are using the device:
+# Asia = LoRa.AS923
+# Australia = LoRa.AU915
+# Europe = LoRa.EU868
+# United States = LoRa.US915
+lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.EU868)
 
-# initialize ambient light sensor
-lightsensor = MAX44009.MAX44009(i2c)
-lightsensor.continuous = 1
-lightsensor.manual = 0
-lightsensor.current_division_ratio = 0
-lightsensor.integration_time = 3
+# Colors
+off = 0x000000
+red = 0x7f0000
+green = 0x007f00
+blue = 0x00007f
 
-# Initialize OneWire bus for temp Sensor
-# DS18B20 data line connected to pin P21
-ow1 = OneWire(Pin('P21'))
-ow2 = OneWire(Pin('P22'))
-air_temp = DS18X20(ow1)
-soil_temp = DS18X20(ow2)
+# Turn off hearbeat LED
+pycom.heartbeat(False)
 
 
-print("Starting measurements...")
+# 70B3D5499B6E0541
+print("DevEUI: " + ubinascii.hexlify(lora.mac()).decode('utf-8').upper())
 
-while True:
-    # Measure and print light
-    read_lux = -1
-    try:
-        read_lux = lightsensor.lux_fast
-    except:
-        print("could not measure light")
-
-    print("Ambient Light luminance : %.2f lux" % read_lux)
-
-    # Measure and print temperatures
-    print("Air temperature: %.2f °C"% air_temp.read_temp_async())
-    print("Soil temperature: %.2f °C " % soil_temp.read_temp_async())
-
-    time.sleep(2)
-    air_temp.start_conversion()
-    soil_temp.start_conversion()
-    time.sleep(5)
+#APP_EUI 0000000000000000
+#APP_KEY A9BE60045BB1C51412D19B96CCB65007
 
 
-############### junk code
+# create an OTAA authentication parameters
+app_eui = ubinascii.unhexlify('0000000000000000')
+app_key = ubinascii.unhexlify('A9BE60045BB1C51412D19B96CCB65007')
 
-"""
-### CODE FOR lowercase library
-import max44009
+# join a network using OTAA (Over the Air Activation)
+lora.join(activation=LoRa.OTAA, auth=(app_eui, app_key), timeout=0)
+pycom.rgbled(0x1f0000)
 
-# i2c.scan() yields [74]
-GY49_ADDR = 74
-
-
-gy49 = max44009.MAX44009(address=74, i2c=i2c)
-
-
-while True:
-
-    time.sleep(1)
-    gy49.measure()
-
-    lux = gy49.read_value()
-
-    print("Ambient Light luminance : %.2f lux" % lux)
-
+while not lora.has_joined():
+    print('Not yet joined...')
+    pycom.rgbled(0x1f0000)
+    time.sleep(0.1)
+    pycom.rgbled(off)
     time.sleep(3)
-"""
+
+print("Joined network")
+
+# create socket to be used for LoRa communication
+s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
+# configure data rate
+s.setsockopt(socket.SOL_LORA, socket.SO_DR, 5)
+# make the socket blocking
+# (waits for the data to be sent and for the 2 receive windows to expire)
+s.setblocking(True)
+
+#define which port with the socket bind
+s.bind(2)
+
+#send some data
+s.send(bytes([0x01,0x02]))
+
+s.setblocking(False)
+# get any data received...
+data = s.recv(64)
+print(data)
