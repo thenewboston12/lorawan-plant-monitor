@@ -25,21 +25,49 @@ air_temp = DS18X20(ow1)
 soil_temp = DS18X20(ow2)
 
 
-def measure():
+print("Starting measurements...")
+
+while True:
     # Measure and print light
-    read_lux = 0.0
+    read_lux = -1
     try:
         read_lux = lightsensor.lux_fast
     except:
         print("could not measure light")
 
+    print("Ambient Light luminance : %.2f lux" % read_lux)
+
     # Measure and print temperatures
-    _air_t =  air_temp.read_temp_async()
-    _soil_t = soil_temp.read_temp_async()
-    _lux = read_lux
+    print("Air temperature: %.2f °C"% air_temp.read_temp_async())
+    print("Soil temperature: %.2f °C " % soil_temp.read_temp_async())
+
     time.sleep(2)
     air_temp.start_conversion()
     soil_temp.start_conversion()
     time.sleep(5)
 
-    return _air_t, _lux, _soil_t
+
+############### junk code
+
+"""
+### CODE FOR lowercase library
+import max44009
+
+# i2c.scan() yields [74]
+GY49_ADDR = 74
+
+
+gy49 = max44009.MAX44009(address=74, i2c=i2c)
+
+
+while True:
+
+    time.sleep(1)
+    gy49.measure()
+
+    lux = gy49.read_value()
+
+    print("Ambient Light luminance : %.2f lux" % lux)
+
+    time.sleep(3)
+"""
