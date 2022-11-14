@@ -8,7 +8,7 @@ import keys
 
 # Initialise LoRa in LORAWAN mode.
 # Europe = LoRa.EU868
-lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.EU868)
+lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.EU868, adr=True)
 
 # Colors
 off = 0x000000
