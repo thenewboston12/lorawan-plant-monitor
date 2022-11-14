@@ -3,6 +3,7 @@ import lorawan
 import struct
 import pycom
 import time
+import machine
 
 # Colors
 off = 0x000000
@@ -43,10 +44,11 @@ def send_data():
     #define which port with the socket bind
     s.bind(2)
     #send some data
+    
     s.send(package)
     print("Sent the measurements")
     pycom.rgbled(green)
-    time.sleep(5)
+    time.sleep(4)
     pycom.rgbled(off)
 
 
@@ -59,5 +61,8 @@ def send_data():
 
 while True:
     send_data()
-    # Sleep for 5 minutes
-    time.sleep(10*60)
+    # Deep Sleep for 10   minutes
+
+    print("Going to deep sleep for 10 minutes ...")
+    machine.deepsleep(10 * 60 * 1000)
+

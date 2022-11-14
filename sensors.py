@@ -12,10 +12,11 @@ i2c.init(I2C.MASTER, baudrate=10000)
 
 # initialize ambient light sensor
 lightsensor = MAX44009.MAX44009(i2c)
-lightsensor.continuous = 1
-lightsensor.manual = 0
-lightsensor.current_division_ratio = 0
-lightsensor.integration_time = 3
+
+# lightsensor.continuous = 1
+# lightsensor.manual = 0
+# lightsensor.current_division_ratio = 0
+# lightsensor.integration_time = 3
 
 # Initialize OneWire bus for temp Sensor
 # DS18B20 data line connected to pin P21
