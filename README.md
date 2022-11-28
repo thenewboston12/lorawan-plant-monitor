@@ -1,4 +1,8 @@
-# CSCI 437 Internet of Things Final Project 
+# LoRaWAN plant monitoring system
+
+Using temperature and ambient light sensors to capture data
+
+Sending data to The Things Network(TTN) cloud
 
 ### Project organization 
 **/lib** folder contains the libraries used by sensors 
